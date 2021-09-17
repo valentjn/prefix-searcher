@@ -54,6 +54,10 @@ void Trie::insertString(size_t stringIndex) {
   currentNode->setStringIndex(stringIndex);
 }
 
+size_t Trie::getNumberOfNodes() const {
+  return m_numberOfNodes;
+}
+
 size_t Trie::getSizeInMemory() const {
   return sizeof(Trie) + m_rootNode.getSizeInMemory();
 }

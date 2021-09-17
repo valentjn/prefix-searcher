@@ -19,9 +19,7 @@ class Trie {
   public:
     Trie(const std::vector<std::string>& strings);
 
-    size_t getNumberOfNodes() const {
-      return m_numberOfNodes;
-    }
+    size_t getNumberOfNodes() const;
 
     size_t getSizeInMemory() const;
 
