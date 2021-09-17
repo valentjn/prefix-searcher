@@ -1,0 +1,34 @@
+/* Copyright (C) 2021 Julian Valentin
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ */
+
+{
+  "version": "2.0.0",
+	"tasks": [
+    {
+      "label": "Build prefix_searcher (Debug)",
+      "type": "shell",
+      "command": "clang++ prefix_searcher.cpp trie/Trie.cpp -I. -std=c++14 -Wall -Wextra -fopenmp -O0 -g -o prefix_searcher.exe",
+      "problemMatcher": "$gcc",
+    },
+    {
+      "label": "Build prefix_searcher (Release)",
+      "type": "shell",
+      "command": "clang++ prefix_searcher.cpp trie/Trie.cpp -I. -std=c++14 -Wall -Wextra -fopenmp -O3 -o prefix_searcher.exe",
+      "problemMatcher": "$gcc",
+      "group": {
+        "kind": "build",
+        "isDefault": true,
+      },
+    },
+    {
+      "label": "Run prefix_searcher",
+      "type":  "shell",
+      "command": "prefix_searcher.exe",
+      "problemMatcher": [],
+    },
+  ],
+}
