@@ -26,8 +26,6 @@ Trie::Trie(const std::vector<std::string>& strings) :
   }
 }
 
-Trie::~Trie() = default;
-
 const Node* Trie::getChildNode(const Node& node, unsigned char key) const {
   return node.getChildNode(key);
 }

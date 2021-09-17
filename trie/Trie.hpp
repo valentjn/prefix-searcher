@@ -8,8 +8,6 @@
 #ifndef TRIE_TRIE_HPP
 #define TRIE_TRIE_HPP
 
-#include <array>
-#include <memory>
 #include <string>
 #include <vector>
 
@@ -20,13 +18,6 @@ namespace trie {
 class Trie {
   public:
     Trie(const std::vector<std::string>& strings);
-    ~Trie();
-
-    Trie(const Trie& trie) = delete;
-    Trie(Trie&& trie) = default;
-
-    Trie& operator=(const Trie& trie) = delete;
-    Trie& operator=(Trie&& trie) = delete;
 
     size_t getNumberOfNodes() const {
       return m_numberOfNodes;
