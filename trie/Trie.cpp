@@ -59,16 +59,9 @@ size_t Trie::getSizeInMemory() const {
 }
 
 std::vector<size_t> Trie::searchPrefix(const std::string& prefix) const {
-  const Node* currentNode{&m_rootNode};
-
-  for (const char& character : prefix) {
-    const unsigned char byte{static_cast<unsigned char>(character)};
-    currentNode = getChildNode(*currentNode, byte);
-    if (currentNode == nullptr) return std::vector<size_t>{};
-  }
-
+  const Node* descendantNode{m_rootNode.getDescendantNodeForPrefix(prefix)};
   std::vector<size_t> stringIndices;
-  currentNode->collectStringIndices(stringIndices);
+  if (descendantNode != nullptr) descendantNode->collectStringIndices(stringIndices);
 
   return stringIndices;
 }

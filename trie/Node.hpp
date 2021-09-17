@@ -64,6 +64,18 @@ class Node {
       }
     }
 
+    const Node* getDescendantNodeForPrefix(const std::string& prefix) const {
+      const Node* currentNode{this};
+
+      for (const char& character : prefix) {
+        const unsigned char byte{static_cast<unsigned char>(character)};
+        currentNode = currentNode->getChildNode(byte);
+        if (currentNode == nullptr) return nullptr;
+      }
+
+      return currentNode;
+    }
+
     void collectStringIndices(std::vector<size_t>& stringIndices) const {
       if (m_stringIndex != INVALID_STRING_INDEX) stringIndices.push_back(m_stringIndex);
 
