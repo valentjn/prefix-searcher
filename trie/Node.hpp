@@ -19,6 +19,8 @@ namespace trie {
 
 class Node {
   public:
+    using KeyChildNodePair = std::pair<unsigned char, std::unique_ptr<Node>>;
+
     static constexpr size_t INVALID_STRING_INDEX = std::numeric_limits<size_t>::max();
 
     Node() : m_stringIndex{INVALID_STRING_INDEX} {
@@ -33,47 +35,61 @@ class Node {
     }
 
     size_t getSizeInMemory() const {
-      return sizeof(Node) + m_keys.size() * sizeof(unsigned char)
-          + m_childNodes.size() * sizeof(std::unique_ptr<Node>)
-          + std::accumulate(std::begin(m_childNodes), std::end(m_childNodes), 0U,
-            [](size_t sizeInMemory, const std::unique_ptr<Node>& childNode) {
-              return sizeInMemory + childNode->getSizeInMemory();
+      return sizeof(Node)
+          + m_keysAndChildNodes.size() * sizeof(KeyChildNodePair)
+          + std::accumulate(std::begin(m_keysAndChildNodes), std::end(m_keysAndChildNodes), 0U,
+            [](size_t sizeInMemory,
+                  const KeyChildNodePair& keyChildNodePair) {
+              return sizeInMemory + keyChildNodePair.second->getSizeInMemory();
             });
     }
 
     Node* getChildNode(unsigned char key) {
-      const auto it = std::find(std::begin(m_keys), std::end(m_keys), key);
-      return (it != std::end(m_keys)) ? m_childNodes[it - std::begin(m_keys)].get() : nullptr;
+      const auto it = findKey(key);
+      return (it != std::end(m_keysAndChildNodes)) ? it->second.get() : nullptr;
     }
 
     const Node* getChildNode(unsigned char key) const {
-      const auto it = std::find(std::begin(m_keys), std::end(m_keys), key);
-      return (it != std::end(m_keys)) ? m_childNodes[it - std::begin(m_keys)].get() : nullptr;
+      const auto it = findKey(key);
+      return (it != std::end(m_keysAndChildNodes)) ? it->second.get() : nullptr;
     }
 
     void setChildNode(unsigned char key, std::unique_ptr<Node> node) {
-      const auto it = std::find(std::begin(m_keys), std::end(m_keys), key);
+      const auto it = findKey(key);
 
-      if (it != std::end(m_keys)) {
-        m_childNodes[it - std::begin(m_keys)] = std::move(node);
+      if (it != std::end(m_keysAndChildNodes)) {
+        it->second = std::move(node);
       } else {
-        m_keys.push_back(key);
-        m_childNodes.push_back(std::move(node));
+        m_keysAndChildNodes.push_back(std::make_pair<>(key, std::move(node)));
       }
     }
 
     void collectStringIndices(std::vector<size_t>& stringIndices) const {
       if (m_stringIndex != INVALID_STRING_INDEX) stringIndices.push_back(m_stringIndex);
 
-      for (size_t index = 0U; index < m_childNodes.size(); index++) {
-        const std::unique_ptr<Node>& childNode{m_childNodes[index]};
-        if (childNode) childNode->collectStringIndices(stringIndices);
+      for (const KeyChildNodePair& keyChildNodePair
+            : m_keysAndChildNodes) {
+        if (keyChildNodePair.second) keyChildNodePair.second->collectStringIndices(stringIndices);
       }
     }
 
+  protected:
+    std::vector<KeyChildNodePair>::const_iterator findKey(unsigned char key) const {
+      return std::find_if(std::begin(m_keysAndChildNodes), std::end(m_keysAndChildNodes),
+          [key](const KeyChildNodePair& keyChildNodePair) {
+            return keyChildNodePair.first == key;
+          });
+    }
+
+    std::vector<KeyChildNodePair>::iterator findKey(unsigned char key) {
+      return std::find_if(std::begin(m_keysAndChildNodes), std::end(m_keysAndChildNodes),
+          [key](const KeyChildNodePair& keyChildNodePair) {
+            return keyChildNodePair.first == key;
+          });
+    }
+
   private:
-    std::vector<unsigned char> m_keys;
-    std::vector<std::unique_ptr<Node>> m_childNodes;
+    std::vector<KeyChildNodePair> m_keysAndChildNodes;
     size_t m_stringIndex;
 };
 
