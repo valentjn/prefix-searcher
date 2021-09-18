@@ -5,7 +5,6 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-#include <array>
 #include <memory>
 #include <string>
 #include <utility>
@@ -15,8 +14,6 @@
 
 #include "trie/Node.hpp"
 #include "trie/Trie.hpp"
-
-#include <iostream>
 
 namespace trie {
 
