@@ -44,14 +44,12 @@ class Node {
             });
     }
 
-    Node* getChildNode(unsigned char key) {
-      const auto it = findKey(key);
-      return (it != std::end(m_keysAndChildNodes)) ? it->second.get() : nullptr;
+    const Node* getChildNode(unsigned char key) const {
+      return getChildNodeInternal(key);
     }
 
-    const Node* getChildNode(unsigned char key) const {
-      const auto it = findKey(key);
-      return (it != std::end(m_keysAndChildNodes)) ? it->second.get() : nullptr;
+    Node* getChildNode(unsigned char key) {
+      return getChildNodeInternal(key);
     }
 
     void setChildNode(unsigned char key, std::unique_ptr<Node> node) {
@@ -86,11 +84,13 @@ class Node {
     }
 
   protected:
+    Node* getChildNodeInternal(unsigned char key) const {
+      const auto it = findKey(key);
+      return (it != std::end(m_keysAndChildNodes)) ? it->second.get() : nullptr;
+    }
+
     std::vector<KeyChildNodePair>::const_iterator findKey(unsigned char key) const {
-      return std::find_if(std::begin(m_keysAndChildNodes), std::end(m_keysAndChildNodes),
-          [key](const KeyChildNodePair& keyChildNodePair) {
-            return keyChildNodePair.first == key;
-          });
+      return const_cast<Node*>(this)->findKey(key);
     }
 
     std::vector<KeyChildNodePair>::iterator findKey(unsigned char key) {
