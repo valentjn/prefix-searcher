@@ -26,6 +26,22 @@ Trie::Trie(const std::vector<std::string>& strings) : m_numberOfNodes{1U} {
   }
 }
 
+size_t Trie::getNumberOfNodes() const {
+  return m_numberOfNodes;
+}
+
+size_t Trie::getSizeInMemory() const {
+  return sizeof(Trie) + m_rootNode.getSizeInMemory();
+}
+
+std::vector<size_t> Trie::searchPrefix(const std::string& prefix) const {
+  const Node* descendantNode{m_rootNode.getDescendantNodeForPrefix(prefix)};
+  std::vector<size_t> stringIndices;
+  if (descendantNode != nullptr) descendantNode->collectStringIndices(stringIndices);
+
+  return stringIndices;
+}
+
 const Node* Trie::getChildNode(const Node& node, unsigned char key) const {
   return node.getChildNode(key);
 }
@@ -52,22 +68,6 @@ void Trie::insertString(const std::vector<std::string>& strings, size_t stringIn
   }
 
   currentNode->setStringIndex(stringIndex);
-}
-
-size_t Trie::getNumberOfNodes() const {
-  return m_numberOfNodes;
-}
-
-size_t Trie::getSizeInMemory() const {
-  return sizeof(Trie) + m_rootNode.getSizeInMemory();
-}
-
-std::vector<size_t> Trie::searchPrefix(const std::string& prefix) const {
-  const Node* descendantNode{m_rootNode.getDescendantNodeForPrefix(prefix)};
-  std::vector<size_t> stringIndices;
-  if (descendantNode != nullptr) descendantNode->collectStringIndices(stringIndices);
-
-  return stringIndices;
 }
 
 }  // namespace trie
