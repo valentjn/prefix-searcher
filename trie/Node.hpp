@@ -19,9 +19,10 @@
 namespace trie {
 
 class Node {
-  public:
+  protected:
     using KeyChildNodePair = std::pair<unsigned char, std::unique_ptr<Node>>;
 
+  public:
     static constexpr size_t INVALID_STRING_INDEX = std::numeric_limits<size_t>::max();
 
     Node() : m_stringIndex{INVALID_STRING_INDEX} {
