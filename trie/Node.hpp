@@ -60,7 +60,7 @@ class Node {
       if (it != std::end(m_keysAndChildNodes)) {
         it->second = std::move(node);
       } else {
-        m_keysAndChildNodes.push_back(std::make_pair<>(key, std::move(node)));
+        m_keysAndChildNodes.push_back(std::make_pair(key, std::move(node)));
       }
     }
 
