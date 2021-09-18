@@ -46,7 +46,7 @@ std::vector<std::string> generateRandomStrings(
   const unsigned int seed{42U};
 
   std::default_random_engine randomNumberGenerator{seed};
-  std::uniform_int_distribution<size_t> characterIndexDistribution{0U, characters.size() - 1U};
+  std::uniform_int_distribution<size_t> characterIndexDistribution{0U, characters.length() - 1U};
   std::function<char(void)> getRandomCharacter =
       [characters, &characterIndexDistribution, &randomNumberGenerator]() {
         return characters[characterIndexDistribution(randomNumberGenerator)];
@@ -81,7 +81,7 @@ void testWithRandomStrings() {
 
   const std::string fullPrefix{"abc"};
 
-  for (size_t prefixLength = 1U; prefixLength <= fullPrefix.size(); prefixLength++) {
+  for (size_t prefixLength = 1U; prefixLength <= fullPrefix.length(); prefixLength++) {
     std::cout << "Searching prefix of length " << prefixLength << "..." << std::endl;
     const std::string prefix{fullPrefix.substr(0U, prefixLength)};
 
