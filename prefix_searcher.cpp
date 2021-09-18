@@ -68,7 +68,7 @@ void testWithRandomStrings() {
 
   std::cout << "Generating random strings..." << std::endl;
   timer.start();
-  std::vector<std::string> strings{generateRandomStrings(3, 10, 5000000)};
+  std::vector<std::string> strings{generateRandomStrings(3U, 10U, 5000000U)};
   timer.stop();
   std::cout << std::endl;
 
@@ -114,7 +114,7 @@ int main() {
   testWithRandomStrings();
 
   /*#pragma omp parallel for
-  for (size_t i = 0; i < 100; i++) {
+  for (size_t i = 0U; i < 100U; i++) {
     std::cout << "thread = " << omp_get_thread_num() << ", i = " << i << std::endl;
   }
 
