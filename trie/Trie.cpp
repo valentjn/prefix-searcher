@@ -19,10 +19,9 @@
 
 namespace trie {
 
-Trie::Trie(const std::vector<std::string>& strings) :
-      m_numberOfNodes{1U}, m_strings{strings} {
+Trie::Trie(const std::vector<std::string>& strings) : m_numberOfNodes{1U} {
   for (size_t stringIndex = 0U; stringIndex < strings.size(); stringIndex++) {
-    insertString(stringIndex);
+    insertString(strings, stringIndex);
   }
 }
 
@@ -43,10 +42,10 @@ Node* Trie::getOrCreateChildNode(Node& node, unsigned char key) {
   return childNode;
 }
 
-void Trie::insertString(size_t stringIndex) {
+void Trie::insertString(const std::vector<std::string>& strings, size_t stringIndex) {
   Node* currentNode{&m_rootNode};
 
-  for (const char& character : m_strings[stringIndex]) {
+  for (const char& character : strings[stringIndex]) {
     const unsigned char byte{static_cast<unsigned char>(character)};
     currentNode = getOrCreateChildNode(*currentNode, byte);
   }

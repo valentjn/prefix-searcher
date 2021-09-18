@@ -29,12 +29,11 @@ class Trie {
     const Node* getChildNode(const Node& node, unsigned char byte) const;
     Node* getOrCreateChildNode(Node& node, unsigned char byte);
 
-    void insertString(size_t stringIndex);
+    void insertString(const std::vector<std::string>& strings, size_t stringIndex);
 
   private:
     Node m_rootNode;
     size_t m_numberOfNodes;
-    const std::vector<std::string>& m_strings;
 };
 
 }  // namespace trie
