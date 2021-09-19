@@ -55,6 +55,18 @@ class Node {
       return getChildNodeInternal(key);
     }
 
+    Node& getOrCreateChildNode(unsigned char key) {
+      Node* childNode{getChildNode(key)};
+
+      if (childNode == nullptr) {
+        std::unique_ptr<Node> childNodeUniquePtr{std::make_unique<Node>()};
+        childNode = childNodeUniquePtr.get();
+        setChildNode(key, std::move(childNodeUniquePtr));
+      }
+
+      return *childNode;
+    }
+
     void setChildNode(unsigned char key, std::unique_ptr<Node> node) {
       const auto it = findKey(key);
 

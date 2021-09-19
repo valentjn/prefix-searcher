@@ -8,7 +8,10 @@
 #ifndef TRIE_TRIE_HPP
 #define TRIE_TRIE_HPP
 
+#include <limits>
+#include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "trie/Node.hpp"
@@ -17,23 +20,45 @@ namespace trie {
 
 class Trie {
   public:
-    Trie(const std::vector<std::string>& strings);
+    Trie();
+    Trie(const std::vector<std::string>& strings, size_t parallelPrefixLength = 2U);
+    Trie(
+        const std::vector<std::string>& strings,
+        const std::vector<size_t>& stringIndices,
+        size_t ignorePrefixLength = 0);
+    Trie(
+        std::vector<Trie>& tries,
+        size_t trieBeginIndex,
+        const std::vector<unsigned char>& keys);
 
-    size_t getNumberOfNodes() const;
-
-    size_t getSizeInMemory() const;
+    const Node& getRootNode() const;
+    Node& getRootNode();
 
     std::vector<size_t> searchPrefix(const std::string& prefix) const;
 
-  protected:
-    const Node* getChildNode(const Node& node, unsigned char byte) const;
-    Node* getOrCreateChildNode(Node& node, unsigned char byte);
+    void insertString(
+        const std::vector<std::string>& strings,
+        size_t stringIndex,
+        size_t ignorePrefixLength = 0);
 
-    void insertString(const std::vector<std::string>& strings, size_t stringIndex);
+    static void bucketSortStrings(
+        const std::vector<std::string>& strings,
+        size_t prefixLength,
+        std::vector<std::string>& bucketPrefixes,
+        std::vector<std::vector<size_t>>& buckets,
+        std::vector<size_t> &shortStringIndices);
+
+    static std::vector<Trie> createBucketTries(
+        const std::vector<std::string>& strings,
+        const size_t prefixLength,
+        const std::vector<std::vector<size_t>>& buckets);
+
+    static void coarsenBucketTries(
+        std::vector<std::string>& bucketPrefixes,
+        std::vector<Trie>& bucketTries);
 
   private:
-    Node m_rootNode;
-    size_t m_numberOfNodes;
+    std::unique_ptr<Node> m_rootNode;
 };
 
 }  // namespace trie

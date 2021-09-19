@@ -76,8 +76,8 @@ void testWithRandomStrings() {
   timer.start();
   trie::Trie stringTrie{strings};
   timer.stop();
-  std::cout << "Number of nodes = " << stringTrie.getNumberOfNodes() << ", memory usage: "
-      << stringTrie.getSizeInMemory() / (1024.0 * 1024.0) << " MiB" << std::endl << std::endl;
+  std::cout << "Memory usage: " << stringTrie.getRootNode().getSizeInMemory() / (1024.0 * 1024.0)
+      << " MiB" << std::endl << std::endl;
 
   const std::string fullPrefix{"abc"};
 
@@ -100,8 +100,8 @@ int main() {
   const std::vector<std::string> strings{"wetter", "hallo", "hello", "welt", "world", "haus"};
   trie::Trie stringTrie{strings};
 
-  std::cout << "Number of nodes = " << stringTrie.getNumberOfNodes() << ", memory usage: "
-      << stringTrie.getSizeInMemory() / (1024.0 * 1024.0) << " MiB" << std::endl;
+  std::cout << "Memory usage: " << stringTrie.getRootNode().getSizeInMemory() / (1024.0 * 1024.0)
+      << " MiB" << std::endl;
 
   const std::vector<size_t> stringIndices{stringTrie.searchPrefix("ha")};
 
