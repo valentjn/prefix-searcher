@@ -19,7 +19,8 @@
 
 class Timer {
   public:
-    void start() {
+    void start(const std::string& message) {
+      std::cout << message << std::endl;
       m_begin = std::chrono::steady_clock::now();
     }
 
@@ -66,14 +67,12 @@ std::vector<std::string> generateRandomStrings(
 void testWithRandomStrings() {
   Timer timer;
 
-  std::cout << "Generating random strings..." << std::endl;
-  timer.start();
+  timer.start("Generating random strings...");
   std::vector<std::string> strings{generateRandomStrings(3U, 10U, 5000000U)};
   timer.stop();
   std::cout << std::endl;
 
-  std::cout << "Constructing trie..." << std::endl;
-  timer.start();
+  timer.start("Constructing trie...");
   trie::Trie stringTrie{strings};
   timer.stop();
   std::cout << "Memory usage: " << stringTrie.getRootNode().getSizeInMemory() / (1024.0 * 1024.0)
@@ -82,18 +81,13 @@ void testWithRandomStrings() {
   const std::string fullPrefix{"abc"};
 
   for (size_t prefixLength = 1U; prefixLength <= fullPrefix.length(); prefixLength++) {
-    std::cout << "Searching prefix of length " << prefixLength << "..." << std::endl;
     const std::string prefix{fullPrefix.substr(0U, prefixLength)};
 
-    timer.start();
+    timer.start("Searching prefix of length " + std::to_string(prefixLength) + "...");
     const std::vector<size_t> stringIndices{stringTrie.searchPrefix(prefix)};
     timer.stop();
     std::cout << "Found " << stringIndices.size() << " match(es)." << std::endl << std::endl;
   }
-
-  /*for (const size_t stringIndex : stringIndices) {
-    std::cout << strings[stringIndex] << std::endl;
-  }*/
 }
 
 int main() {
