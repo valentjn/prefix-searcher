@@ -97,13 +97,13 @@ void testWithRandomStrings() {
 }
 
 int main() {
-  const std::vector<std::string> strings{"hallo", "hello", "welt", "world"};
+  const std::vector<std::string> strings{"wetter", "hallo", "hello", "welt", "world", "haus"};
   trie::Trie stringTrie{strings};
 
   std::cout << "Number of nodes = " << stringTrie.getNumberOfNodes() << ", memory usage: "
       << stringTrie.getSizeInMemory() / (1024.0 * 1024.0) << " MiB" << std::endl;
 
-  const std::vector<size_t> stringIndices{stringTrie.searchPrefix("h")};
+  const std::vector<size_t> stringIndices{stringTrie.searchPrefix("ha")};
 
   std::cout << "Found " << stringIndices.size() << " match(es):" << std::endl;
 
@@ -112,13 +112,6 @@ int main() {
   }
 
   testWithRandomStrings();
-
-  /*#pragma omp parallel for
-  for (size_t i = 0U; i < 100U; i++) {
-    std::cout << "thread = " << omp_get_thread_num() << ", i = " << i << std::endl;
-  }
-
-  assert(2 == 3);*/
 
   return 0;
 }
