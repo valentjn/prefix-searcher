@@ -9,6 +9,7 @@
 #define TRIE_NODE_HPP
 
 #include <algorithm>
+#include <iostream>
 #include <limits>
 #include <memory>
 #include <numeric>
@@ -79,8 +80,7 @@ class Node {
     void collectStringIndices(std::vector<size_t>& stringIndices) const {
       if (m_stringIndex != INVALID_STRING_INDEX) stringIndices.push_back(m_stringIndex);
 
-      for (const KeyChildNodePair& keyChildNodePair
-            : m_keysAndChildNodes) {
+      for (const KeyChildNodePair& keyChildNodePair : m_keysAndChildNodes) {
         if (keyChildNodePair.second) keyChildNodePair.second->collectStringIndices(stringIndices);
       }
     }
