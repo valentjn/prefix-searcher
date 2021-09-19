@@ -77,6 +77,20 @@ class Node {
       return currentNode;
     }
 
+    void print(size_t indentationLevel = 0U) const {
+      std::cout << "Node" << std::endl;
+
+      for (const KeyChildNodePair& keyChildNodePair : m_keysAndChildNodes) {
+        for (size_t level = 0U; level < indentationLevel + 1; level++) {
+          std::cout << "  ";
+        }
+
+        std::cout << "'" << keyChildNodePair.first << "' ("
+            << static_cast<size_t>(keyChildNodePair.first) << "): ";
+        keyChildNodePair.second->print(indentationLevel + 1);
+      }
+    }
+
     void collectStringIndices(std::vector<size_t>& stringIndices) const {
       if (m_stringIndex != INVALID_STRING_INDEX) stringIndices.push_back(m_stringIndex);
 

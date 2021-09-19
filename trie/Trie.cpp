@@ -56,6 +56,10 @@ Node* Trie::getOrCreateChildNode(Node& node, unsigned char key) {
   return childNode;
 }
 
+void Trie::print() const {
+  m_rootNode->print();
+}
+
 void Trie::insertString(const std::vector<std::string>& strings, size_t stringIndex) {
   Node* currentNode{&m_rootNode};
 
