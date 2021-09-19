@@ -1,0 +1,39 @@
+# Copyright (C) 2021 Julian Valentin
+#
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+name: "CI"
+
+on:
+  push:
+    branches:
+      - "*"
+    tags:
+      - "*"
+  pull_request:
+    branches:
+      - "develop"
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: "CI - Build Job"
+    runs-on: "ubuntu-20.04"
+
+    steps:
+      - name: "Checkout Repository"
+        uses: "actions/checkout@v2"
+
+      - name: "Install clang-tidy"
+        run: "sudo apt install clang-tidy"
+
+      - name: "Compile prefix_searcher"
+        run: "clang++ prefix_searcher.cpp trie/Trie.cpp -I. -std=c++14 -Wall -Wextra -fopenmp -O3 -o prefix_searcher"
+
+      - name: "Run prefix_searcher"
+        run: "./prefix_searcher"
+
+      - name: "Run clang-tidy"
+        run: "clang-tidy prefix_searcher.cpp trie/Node.hpp trie/Trie.cpp trie/Trie.hpp -- -I."
