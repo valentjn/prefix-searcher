@@ -36,11 +36,16 @@ Trie::Trie(const std::vector<std::string>& strings, size_t parallelPrefixLength)
     std::vector<Trie> bucketTries{createBucketTries(strings, parallelPrefixLength, buckets)};
 
     for (size_t coarsePrefixLength = parallelPrefixLength; coarsePrefixLength-- > 0;) {
+      // reduce length of bucket prefixes by 1 by merging tries
+      // (e.g., AB, AC, BD, BE: merge AB and AC tries to obtain an A trie, and
+      // merge BD and BE tries to obtain a B trie)
       coarsenBucketTries(bucketPrefixes, bucketTries);
     }
 
+    // bucketTries has size 1 at this point (all tries have merged into one)
     *this = std::move(bucketTries[0]);
 
+    // insert short strings
     for (const size_t& shortStringIndex : shortStringIndices) {
       insertString(strings, shortStringIndex);
     }
@@ -62,6 +67,8 @@ Trie::Trie(
       size_t trieBeginIndex,
       const std::vector<unsigned char>& keys)
       : m_rootNode{std::make_unique<Node>()} {
+  // as child nodes for the new trie, use the root nodes of the tries with indices
+  // trieBeginIndex, trieBeginIndex + 1, ..., trieBeginIndex + keys.size() - 1
   for (size_t i = 0U; i < keys.size(); i++) {
     m_rootNode->setChildNode(keys[i], std::move(tries[trieBeginIndex + i].m_rootNode));
   }
@@ -79,7 +86,6 @@ std::vector<size_t> Trie::searchPrefix(const std::string& prefix) const {
   const Node* descendantNode{m_rootNode->getDescendantNodeForPrefix(prefix)};
   std::vector<size_t> stringIndices;
   if (descendantNode != nullptr) descendantNode->collectStringIndices(stringIndices);
-
   return stringIndices;
 }
 
@@ -108,6 +114,8 @@ void Trie::bucketSortStrings(
   buckets.clear();
   shortStringIndices.clear();
 
+  // powersOf256 will contain the powers of 256 in reverse order:
+  // (256 ** (prefixLength - 1), 256 ** (prefixLength - 2), ..., 256, 1)
   std::vector<size_t> powersOf256(prefixLength);
   size_t currentPowerOf256 = 1U;
 
@@ -116,10 +124,13 @@ void Trie::bucketSortStrings(
     currentPowerOf256 *= 256U;
   }
 
+  // currentPowerOf256 is 256 ** prefixLength at this point
   std::vector<std::vector<size_t>> allBucketVectors(currentPowerOf256);
 
   for (size_t stringIndex = 0U; stringIndex < strings.size(); stringIndex++) {
     if (strings[stringIndex].length() >= prefixLength) {
+      // store indices of long strings in bucket corresponding to its prefix
+      // bucket indices are in lexicographical order (e.g., AA, AB, BA, BB --> 0, 1, 2, 3)
       size_t bucketIndex = 0U;
 
       for (size_t i = 0U; i < prefixLength; i++) {
@@ -128,6 +139,7 @@ void Trie::bucketSortStrings(
 
       allBucketVectors[bucketIndex].push_back(stringIndex);
     } else {
+      // store indices of short strings in shortStringIndices
       shortStringIndices.push_back(stringIndex);
     }
   }
@@ -135,7 +147,9 @@ void Trie::bucketSortStrings(
   std::string currentPrefix(prefixLength, 'X');
 
   for (size_t bucketIndex = 0U; bucketIndex < allBucketVectors.size(); bucketIndex++) {
+    // only include non-empty buckets in result
     if (!allBucketVectors[bucketIndex].empty()) {
+      // recreate prefix from bucket indices
       for (size_t i = 0U; i < prefixLength; i++) {
         currentPrefix[i] = static_cast<char>((bucketIndex / powersOf256[i]) % 256U);
       }
@@ -152,6 +166,7 @@ std::vector<Trie> Trie::createBucketTries(
       const std::vector<std::vector<size_t>>& buckets) {
   std::vector<Trie> bucketTries(buckets.size());
 
+  // create one trie for each bucket, ignoring the first prefixLength characters in each string
   #pragma omp parallel for default(none) shared(strings, prefixLength, buckets, bucketTries)
   for (size_t bucketIndex = 0U; bucketIndex < buckets.size(); bucketIndex++) {
     bucketTries[bucketIndex] = Trie(strings, buckets[bucketIndex], prefixLength);
@@ -164,16 +179,26 @@ void Trie::coarsenBucketTries(
       std::vector<std::string>& bucketPrefixes,
       std::vector<Trie>& bucketTries) {
   if (bucketPrefixes.empty()) return;
+  // length of the prefix of the resulting buckets
+  // (assumption: all strings in bucketPrefixes have the same length)
   const size_t coarsePrefixLength = bucketPrefixes[0].length() - 1;
 
   std::vector<std::string> coarseBucketPrefixes;
   std::vector<Trie> coarseTries;
   std::string coarseBucketPrefix(coarsePrefixLength, 'X');
+
+  // coarseBucketBeginIndex is inclusive
   size_t coarseBucketBeginIndex = 0U;
 
+  // buckets are contiguous, so it suffices to search coarseBucketEndIndex
+  // starting from coarseBucketBeginIndex, which equals coarseBucketEndIndex
+  // from the previous iteration
+  // (assumption: bucketPrefixes is sorted)
   while (coarseBucketBeginIndex < bucketTries.size()) {
     bucketPrefixes[coarseBucketBeginIndex].copy(
         &coarseBucketPrefix[0], coarsePrefixLength);
+
+    // coarseBucketEndIndex is exclusive
     size_t coarseBucketEndIndex = coarseBucketBeginIndex + 1;
 
     for (; coarseBucketEndIndex < bucketTries.size(); coarseBucketEndIndex++) {
@@ -183,6 +208,9 @@ void Trie::coarsenBucketTries(
       }
     }
 
+    // we know where the bucket starts and ends --> determine the keys of the child nodes
+    // of the root node of the coarse trie to be created as the last character of each prefix
+    // (the characters before are equal)
     std::vector<unsigned char> keys;
 
     for (size_t bucketIndex = coarseBucketBeginIndex; bucketIndex < coarseBucketEndIndex;
@@ -191,6 +219,7 @@ void Trie::coarsenBucketTries(
           bucketPrefixes[bucketIndex][coarsePrefixLength]));
     }
 
+    // merge tries
     coarseBucketPrefixes.push_back(coarseBucketPrefix);
     coarseTries.emplace_back(bucketTries, coarseBucketBeginIndex, keys);
     coarseBucketBeginIndex = coarseBucketEndIndex;

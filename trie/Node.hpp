@@ -38,6 +38,8 @@ class Node {
     }
 
     size_t getSizeInMemory() const {
+      // account for size of this, the size of the heap memory reserved by m_keysAndChildNodes,
+      // and the size of the heap memory reserved by the child node unique_ptrs
       return sizeof(Node)
           + m_keysAndChildNodes.size() * sizeof(KeyChildNodePair)
           + std::accumulate(std::begin(m_keysAndChildNodes), std::end(m_keysAndChildNodes), 0U,
@@ -100,6 +102,7 @@ class Node {
         std::cout << "'" << keyChildNodePair.first << "' ("
             << static_cast<size_t>(keyChildNodePair.first) << "): ";
         keyChildNodePair.second->print(indentationLevel + 1);
+        // we don't have to print a newline, as this is done by the leaves
       }
     }
 

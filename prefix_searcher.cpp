@@ -91,7 +91,9 @@ std::string generateRandomString(size_t length, std::function<char(void)> getRan
 }
 
 std::vector<std::string> generateRandomStrings(
-      size_t minimumLength, size_t maximumLength, size_t numberOfStrings) {
+      size_t minimumLength,
+      size_t maximumLength,
+      size_t numberOfStrings) {
   const std::string characters{"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"};
   const unsigned int seed{42U};
 
