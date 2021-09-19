@@ -23,7 +23,7 @@ Trie::Trie() : m_rootNode{std::make_unique<Node>()} {
 
 Trie::Trie(const std::vector<std::string>& strings, size_t parallelPrefixLength)
       : m_rootNode{std::make_unique<Node>()} {
-  if ((parallelPrefixLength == 0) || (omp_get_max_threads() == 1)) {
+  if ((parallelPrefixLength == 0U) || (omp_get_max_threads() == 1)) {
     for (size_t stringIndex = 0U; stringIndex < strings.size(); stringIndex++) {
       insertString(strings, stringIndex);
     }
@@ -35,7 +35,7 @@ Trie::Trie(const std::vector<std::string>& strings, size_t parallelPrefixLength)
 
     std::vector<Trie> bucketTries{createBucketTries(strings, parallelPrefixLength, buckets)};
 
-    for (size_t coarsePrefixLength = parallelPrefixLength; coarsePrefixLength-- > 0;) {
+    for (size_t coarsePrefixLength = parallelPrefixLength; coarsePrefixLength-- > 0U;) {
       // reduce length of bucket prefixes by 1 by merging tries
       // (e.g., AB, AC, BD, BE: merge AB and AC tries to obtain an A trie, and
       // merge BD and BE tries to obtain a B trie)
@@ -43,7 +43,7 @@ Trie::Trie(const std::vector<std::string>& strings, size_t parallelPrefixLength)
     }
 
     // bucketTries has size 1 at this point (all tries have merged into one)
-    *this = std::move(bucketTries[0]);
+    *this = std::move(bucketTries[0U]);
 
     // insert short strings
     for (const size_t& shortStringIndex : shortStringIndices) {
@@ -181,7 +181,7 @@ void Trie::coarsenBucketTries(
   if (bucketPrefixes.empty()) return;
   // length of the prefix of the resulting buckets
   // (assumption: all strings in bucketPrefixes have the same length)
-  const size_t coarsePrefixLength = bucketPrefixes[0].length() - 1;
+  const size_t coarsePrefixLength = bucketPrefixes[0U].length() - 1U;
 
   std::vector<std::string> coarseBucketPrefixes;
   std::vector<Trie> coarseTries;
@@ -196,14 +196,14 @@ void Trie::coarsenBucketTries(
   // (assumption: bucketPrefixes is sorted)
   while (coarseBucketBeginIndex < bucketTries.size()) {
     bucketPrefixes[coarseBucketBeginIndex].copy(
-        &coarseBucketPrefix[0], coarsePrefixLength);
+        &coarseBucketPrefix[0U], coarsePrefixLength);
 
     // coarseBucketEndIndex is exclusive
-    size_t coarseBucketEndIndex = coarseBucketBeginIndex + 1;
+    size_t coarseBucketEndIndex = coarseBucketBeginIndex + 1U;
 
     for (; coarseBucketEndIndex < bucketTries.size(); coarseBucketEndIndex++) {
       if (bucketPrefixes[coarseBucketEndIndex].compare(
-            0, coarsePrefixLength, coarseBucketPrefix) != 0) {
+            0U, coarsePrefixLength, coarseBucketPrefix) != 0) {
         break;
       }
     }

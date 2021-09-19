@@ -95,13 +95,13 @@ class Node {
       std::cout << "Node" << std::endl;
 
       for (const KeyChildNodePair& keyChildNodePair : m_keysAndChildNodes) {
-        for (size_t level = 0U; level < indentationLevel + 1; level++) {
+        for (size_t level = 0U; level < indentationLevel + 1U; level++) {
           std::cout << "  ";
         }
 
         std::cout << "'" << keyChildNodePair.first << "' ("
             << static_cast<size_t>(keyChildNodePair.first) << "): ";
-        keyChildNodePair.second->print(indentationLevel + 1);
+        keyChildNodePair.second->print(indentationLevel + 1U);
         // we don't have to print a newline, as this is done by the leaves
       }
     }

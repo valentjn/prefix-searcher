@@ -25,7 +25,7 @@ class Trie {
     Trie(
         const std::vector<std::string>& strings,
         const std::vector<size_t>& stringIndices,
-        size_t ignorePrefixLength = 0);
+        size_t ignorePrefixLength = 0U);
     Trie(
         std::vector<Trie>& tries,
         size_t trieBeginIndex,
@@ -39,7 +39,7 @@ class Trie {
     void insertString(
         const std::vector<std::string>& strings,
         size_t stringIndex,
-        size_t ignorePrefixLength = 0);
+        size_t ignorePrefixLength = 0U);
 
     static void bucketSortStrings(
         const std::vector<std::string>& strings,
