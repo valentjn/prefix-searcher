@@ -27,8 +27,10 @@ class Timer {
 
     void stop() {
       std::chrono::steady_clock::time_point end{std::chrono::steady_clock::now()};
+      constexpr double numberOfMicrosecondsPerMillisecond = 1000.0;
       std::cout << "Finished in "
-          << std::chrono::duration_cast<std::chrono::microseconds>(end - m_begin).count() / 1000.0
+          << static_cast<double>(std::chrono::duration_cast<std::chrono::microseconds>(
+            end - m_begin).count()) / numberOfMicrosecondsPerMillisecond
           << "ms." << std::endl;
     }
 
@@ -47,11 +49,20 @@ void testSearchPrefix(
   timer.stop();
 
   std::cout << "Found " << stringIndices.size() << " match";
-  if (stringIndices.size() != 1U) std::cout << "es";
-  std::cout << (printMatches ? ":" : ".") << std::endl;
+  if (stringIndices.size() != 1U) {
+    std::cout << "es";
+  }
+
+  if (printMatches) {
+    std::cout << ":" << std::endl;
+  } else {
+    std::cout << "." << std::endl;
+  }
 
   for (const size_t stringIndex : stringIndices) {
-    if (printMatches) std::cout << strings[stringIndex] << std::endl;
+    if (printMatches) {
+      std::cout << strings[stringIndex] << std::endl;
+    }
   }
 
   std::vector<size_t> expectedStringIndices;
@@ -78,15 +89,12 @@ void testWithSimpleExample() {
 
   const std::vector<std::string> strings{"wetter", "hallo", "hello", "welt", "world", "haus"};
   trie::Trie trie{strings};
-  std::cout << "Memory usage: " << trie.getRootNode().getSizeInMemory() / (1024.0 * 1024.0)
-      << " MiB" << std::endl;
-
   testSearchPrefix(strings, trie, "ha", true);
 }
 
 std::string generateRandomString(size_t length, std::function<char(void)> getRandomCharacter) {
   std::string string(length, 0U);
-  std::generate_n(string.begin(), length, getRandomCharacter);
+  std::generate_n(string.begin(), length, std::move(getRandomCharacter));
   return string;
 }
 
@@ -119,15 +127,22 @@ void testWithRandomStrings() {
   std::cout << std::endl;
   Timer timer;
 
+  constexpr size_t minimumStringLength = 3U;
+  constexpr size_t maximumStringLength = 30U;
+  constexpr size_t numberOfStrings = 2000000U;
   timer.start("Generating random strings...");
-  std::vector<std::string> strings{generateRandomStrings(3U, 30U, 2000000U)};
+  std::vector<std::string> strings{generateRandomStrings(
+      minimumStringLength, maximumStringLength, numberOfStrings)};
   timer.stop();
   std::cout << std::endl;
 
   timer.start("Constructing trie...");
   trie::Trie trie{strings};
   timer.stop();
-  std::cout << "Memory usage: " << trie.getRootNode().getSizeInMemory() / (1024.0 * 1024.0)
+
+  constexpr double numberOfBytesPerMibibyte = 1024.0 * 1024.0;
+  std::cout << "Memory usage: "
+      << static_cast<double>(trie.getRootNode().getSizeInMemory()) / numberOfBytesPerMibibyte
       << " MiB" << std::endl;
 
   const std::string fullPrefix{"abcde"};

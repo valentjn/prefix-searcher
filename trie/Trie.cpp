@@ -39,7 +39,7 @@ Trie::Trie(const std::vector<std::string>& strings, size_t parallelPrefixLength)
       // reduce length of bucket prefixes by 1 by merging tries
       // (e.g., AB, AC, BD, BE: merge AB and AC tries to obtain an A trie, and
       // merge BD and BE tries to obtain a B trie)
-      coarsenBucketTries(std::move(bucketPrefixes), std::move(bucketTries));
+      coarsenBucketTries(bucketPrefixes, bucketTries);
     }
 
     // bucketTries has size 1 at this point (all tries have merged into one)
@@ -85,7 +85,11 @@ Node& Trie::getRootNode() {
 std::vector<size_t> Trie::searchPrefix(const std::string& prefix) const {
   const Node* descendantNode{m_rootNode->getDescendantNodeForPrefix(prefix)};
   std::vector<size_t> stringIndices;
-  if (descendantNode != nullptr) descendantNode->collectStringIndices(stringIndices);
+
+  if (descendantNode != nullptr) {
+    descendantNode->collectStringIndices(stringIndices);
+  }
+
   return stringIndices;
 }
 
@@ -114,6 +118,8 @@ void Trie::bucketSortStrings(
   buckets.clear();
   shortStringIndices.clear();
 
+  constexpr size_t numberOfBytes = 256U;
+
   // powersOf256 will contain the powers of 256 in reverse order:
   // (256 ** (prefixLength - 1), 256 ** (prefixLength - 2), ..., 256, 1)
   std::vector<size_t> powersOf256(prefixLength);
@@ -121,7 +127,7 @@ void Trie::bucketSortStrings(
 
   for (size_t i = 0U; i < prefixLength; i++) {
     powersOf256[prefixLength - i - 1U] = currentPowerOf256;
-    currentPowerOf256 *= 256U;
+    currentPowerOf256 *= numberOfBytes;
   }
 
   // currentPowerOf256 is 256 ** prefixLength at this point
@@ -151,7 +157,7 @@ void Trie::bucketSortStrings(
     if (!allBucketVectors[bucketIndex].empty()) {
       // recreate prefix from bucket indices
       for (size_t i = 0U; i < prefixLength; i++) {
-        currentPrefix[i] = static_cast<char>((bucketIndex / powersOf256[i]) % 256U);
+        currentPrefix[i] = static_cast<char>((bucketIndex / powersOf256[i]) % numberOfBytes);
       }
 
       bucketPrefixes.push_back(currentPrefix);
@@ -176,9 +182,12 @@ std::vector<Trie> Trie::createBucketTries(
 }
 
 void Trie::coarsenBucketTries(
-      std::vector<std::string>&& bucketPrefixes,
-      std::vector<Trie>&& bucketTries) {
-  if (bucketPrefixes.empty()) return;
+      std::vector<std::string>& bucketPrefixes,
+      std::vector<Trie>& bucketTries) {
+  if (bucketPrefixes.empty()) {
+    return;
+  }
+
   // length of the prefix of the resulting buckets
   // (assumption: all strings in bucketPrefixes have the same length)
   const size_t coarsePrefixLength = bucketPrefixes[0U].length() - 1U;

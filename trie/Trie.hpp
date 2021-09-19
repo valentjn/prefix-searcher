@@ -21,7 +21,7 @@ namespace trie {
 class Trie {
   public:
     Trie();
-    Trie(const std::vector<std::string>& strings, size_t parallelPrefixLength = 2U);
+    explicit Trie(const std::vector<std::string>& strings, size_t parallelPrefixLength = 2U);
     Trie(
         const std::vector<std::string>& strings,
         const std::vector<size_t>& stringIndices,
@@ -50,12 +50,12 @@ class Trie {
 
     static std::vector<Trie> createBucketTries(
         const std::vector<std::string>& strings,
-        const size_t prefixLength,
+        size_t prefixLength,
         const std::vector<std::vector<size_t>>& buckets);
 
     static void coarsenBucketTries(
-        std::vector<std::string>&& bucketPrefixes,
-        std::vector<Trie>&& bucketTries);
+        std::vector<std::string>& bucketPrefixes,
+        std::vector<Trie>& bucketTries);
 
   private:
     std::unique_ptr<Node> m_rootNode;

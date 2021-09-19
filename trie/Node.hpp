@@ -26,10 +26,7 @@ class Node {
   public:
     static constexpr size_t INVALID_STRING_INDEX = std::numeric_limits<size_t>::max();
 
-    Node() : m_stringIndex{INVALID_STRING_INDEX} {
-    }
-
-    bool getStringIndex() const {
+    size_t getStringIndex() const {
       return m_stringIndex;
     }
 
@@ -75,7 +72,7 @@ class Node {
       if (it != std::end(m_keysAndChildNodes)) {
         it->second = std::move(node);
       } else {
-        m_keysAndChildNodes.push_back(std::make_pair(key, std::move(node)));
+        m_keysAndChildNodes.emplace_back(key, std::move(node));
       }
     }
 
@@ -85,7 +82,10 @@ class Node {
       for (const char& character : prefix) {
         const unsigned char byte{static_cast<unsigned char>(character)};
         currentNode = currentNode->getChildNode(byte);
-        if (currentNode == nullptr) return nullptr;
+
+        if (currentNode == nullptr) {
+          return nullptr;
+        }
       }
 
       return currentNode;
@@ -107,10 +107,14 @@ class Node {
     }
 
     void collectStringIndices(std::vector<size_t>& stringIndices) const {
-      if (m_stringIndex != INVALID_STRING_INDEX) stringIndices.push_back(m_stringIndex);
+      if (m_stringIndex != INVALID_STRING_INDEX) {
+        stringIndices.push_back(m_stringIndex);
+      }
 
       for (const KeyChildNodePair& keyChildNodePair : m_keysAndChildNodes) {
-        if (keyChildNodePair.second) keyChildNodePair.second->collectStringIndices(stringIndices);
+        if (keyChildNodePair.second) {
+          keyChildNodePair.second->collectStringIndices(stringIndices);
+        }
       }
     }
 
@@ -121,7 +125,10 @@ class Node {
     }
 
     std::vector<KeyChildNodePair>::const_iterator findKey(unsigned char key) const {
-      return const_cast<Node*>(this)->findKey(key);
+      return std::find_if(std::begin(m_keysAndChildNodes), std::end(m_keysAndChildNodes),
+          [key](const KeyChildNodePair& keyChildNodePair) {
+            return keyChildNodePair.first == key;
+          });
     }
 
     std::vector<KeyChildNodePair>::iterator findKey(unsigned char key) {
@@ -133,7 +140,7 @@ class Node {
 
   private:
     std::vector<KeyChildNodePair> m_keysAndChildNodes;
-    size_t m_stringIndex;
+    size_t m_stringIndex{INVALID_STRING_INDEX};
 };
 
 }  // namespace trie
