@@ -5,15 +5,16 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-#include <cassert>
-#include <iostream>
-#include <string>
-#include <vector>
-
 #include <algorithm>
+#include <cassert>
 #include <chrono>
 #include <functional>
+#include <iostream>
 #include <random>
+#include <set>
+#include <stdexcept>
+#include <string>
+#include <vector>
 
 #include "trie/Trie.hpp"
 
@@ -35,6 +36,54 @@ class Timer {
     std::chrono::steady_clock::time_point m_begin;
 };
 
+void testSearchPrefix(
+      const std::vector<std::string>& strings,
+      const trie::Trie& trie,
+      const std::string& prefix,
+      bool printMatches = false) {
+  Timer timer;
+  timer.start("Searching prefix \"" + prefix + "\" via trie...");
+  std::vector<size_t> stringIndices{trie.searchPrefix(prefix)};
+  timer.stop();
+
+  std::cout << "Found " << stringIndices.size() << " match";
+  if (stringIndices.size() != 1U) std::cout << "es";
+  std::cout << (printMatches ? ":" : ".") << std::endl;
+
+  for (const size_t stringIndex : stringIndices) {
+    if (printMatches) std::cout << strings[stringIndex] << std::endl;
+  }
+
+  std::vector<size_t> expectedStringIndices;
+  timer.start("Searching prefix \"" + prefix + "\" via naive loop...");
+
+  for (size_t stringIndex = 0U; stringIndex < strings.size(); stringIndex++) {
+    if (strings[stringIndex].rfind(prefix, 0U) == 0U) {
+      expectedStringIndices.push_back(stringIndex);
+    }
+  }
+
+  timer.stop();
+  std::sort(std::begin(stringIndices), std::end(stringIndices));
+
+  if (stringIndices == expectedStringIndices) {
+    std::cout << "Actual matches equal expected matches." << std::endl;
+  } else {
+    throw std::runtime_error("Actual matches do not equal expected matches.");
+  }
+}
+
+void testWithSimpleExample() {
+  std::cout << std::endl;
+
+  const std::vector<std::string> strings{"wetter", "hallo", "hello", "welt", "world", "haus"};
+  trie::Trie trie{strings};
+  std::cout << "Memory usage: " << trie.getRootNode().getSizeInMemory() / (1024.0 * 1024.0)
+      << " MiB" << std::endl;
+
+  testSearchPrefix(strings, trie, "ha", true);
+}
+
 std::string generateRandomString(size_t length, std::function<char(void)> getRandomCharacter) {
   std::string string(length, 0U);
   std::generate_n(string.begin(), length, getRandomCharacter);
@@ -54,57 +103,42 @@ std::vector<std::string> generateRandomStrings(
       };
 
   std::uniform_int_distribution<size_t> lengthDistribution{minimumLength, maximumLength};
-  std::vector<std::string> strings;
+  std::set<std::string> stringSet;
 
-  for (size_t i = 0U; i < numberOfStrings; i++) {
+  while (stringSet.size() < numberOfStrings) {
     const size_t length{lengthDistribution(randomNumberGenerator)};
-    strings.push_back(generateRandomString(length, getRandomCharacter));
+    stringSet.insert(generateRandomString(length, getRandomCharacter));
   }
 
-  return strings;
+  return std::vector<std::string>(std::begin(stringSet), std::end(stringSet));
 }
 
 void testWithRandomStrings() {
+  std::cout << std::endl;
   Timer timer;
 
   timer.start("Generating random strings...");
-  std::vector<std::string> strings{generateRandomStrings(3U, 10U, 5000000U)};
+  std::vector<std::string> strings{generateRandomStrings(3U, 30U, 2000000U)};
   timer.stop();
   std::cout << std::endl;
 
   timer.start("Constructing trie...");
-  trie::Trie stringTrie{strings};
+  trie::Trie trie{strings};
   timer.stop();
-  std::cout << "Memory usage: " << stringTrie.getRootNode().getSizeInMemory() / (1024.0 * 1024.0)
-      << " MiB" << std::endl << std::endl;
+  std::cout << "Memory usage: " << trie.getRootNode().getSizeInMemory() / (1024.0 * 1024.0)
+      << " MiB" << std::endl;
 
-  const std::string fullPrefix{"abc"};
+  const std::string fullPrefix{"abcde"};
 
   for (size_t prefixLength = 1U; prefixLength <= fullPrefix.length(); prefixLength++) {
     const std::string prefix{fullPrefix.substr(0U, prefixLength)};
-
-    timer.start("Searching prefix of length " + std::to_string(prefixLength) + "...");
-    const std::vector<size_t> stringIndices{stringTrie.searchPrefix(prefix)};
-    timer.stop();
-    std::cout << "Found " << stringIndices.size() << " match(es)." << std::endl << std::endl;
+    std::cout << std::endl;
+    testSearchPrefix(strings, trie, prefix);
   }
 }
 
 int main() {
-  const std::vector<std::string> strings{"wetter", "hallo", "hello", "welt", "world", "haus"};
-  trie::Trie stringTrie{strings};
-
-  std::cout << "Memory usage: " << stringTrie.getRootNode().getSizeInMemory() / (1024.0 * 1024.0)
-      << " MiB" << std::endl;
-
-  const std::vector<size_t> stringIndices{stringTrie.searchPrefix("ha")};
-
-  std::cout << "Found " << stringIndices.size() << " match(es):" << std::endl;
-
-  for (const size_t stringIndex : stringIndices) {
-    std::cout << strings[stringIndex] << std::endl;
-  }
-
+  testWithSimpleExample();
   testWithRandomStrings();
 
   return 0;
