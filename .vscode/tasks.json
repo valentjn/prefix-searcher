@@ -30,5 +30,11 @@
       "command": "prefix_searcher.exe",
       "problemMatcher": [],
     },
+    {
+      "label": "Lint with clang-tidy",
+      "type":  "shell",
+      "command": "clang-tidy prefix_searcher.cpp trie/Node.hpp trie/Trie.cpp trie/Trie.hpp -- -I.",
+      "problemMatcher": "$gcc",
+    },
   ],
 }
