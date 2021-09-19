@@ -11,7 +11,7 @@
     {
       "label": "Build prefix_searcher (Debug)",
       "type": "shell",
-      "command": "clang++ prefix_searcher.cpp trie/Trie.cpp -I. -std=c++14 -Wall -Wextra -fopenmp -O0 -g -o prefix_searcher.exe",
+      "command": "clang++ prefix_searcher.cpp trie/Trie.cpp -I. -std=c++14 -Wall -Wextra -fopenmp -Og -g -o prefix_searcher.exe",
       "problemMatcher": "$gcc",
     },
     {
