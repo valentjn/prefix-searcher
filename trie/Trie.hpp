@@ -54,8 +54,8 @@ class Trie {
         const std::vector<std::vector<size_t>>& buckets);
 
     static void coarsenBucketTries(
-        std::vector<std::string>& bucketPrefixes,
-        std::vector<Trie>& bucketTries);
+        std::vector<std::string>&& bucketPrefixes,
+        std::vector<Trie>&& bucketTries);
 
   private:
     std::unique_ptr<Node> m_rootNode;

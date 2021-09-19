@@ -39,7 +39,7 @@ Trie::Trie(const std::vector<std::string>& strings, size_t parallelPrefixLength)
       // reduce length of bucket prefixes by 1 by merging tries
       // (e.g., AB, AC, BD, BE: merge AB and AC tries to obtain an A trie, and
       // merge BD and BE tries to obtain a B trie)
-      coarsenBucketTries(bucketPrefixes, bucketTries);
+      coarsenBucketTries(std::move(bucketPrefixes), std::move(bucketTries));
     }
 
     // bucketTries has size 1 at this point (all tries have merged into one)
@@ -176,8 +176,8 @@ std::vector<Trie> Trie::createBucketTries(
 }
 
 void Trie::coarsenBucketTries(
-      std::vector<std::string>& bucketPrefixes,
-      std::vector<Trie>& bucketTries) {
+      std::vector<std::string>&& bucketPrefixes,
+      std::vector<Trie>&& bucketTries) {
   if (bucketPrefixes.empty()) return;
   // length of the prefix of the resulting buckets
   // (assumption: all strings in bucketPrefixes have the same length)
@@ -225,8 +225,8 @@ void Trie::coarsenBucketTries(
     coarseBucketBeginIndex = coarseBucketEndIndex;
   }
 
-  std::swap(bucketPrefixes, coarseBucketPrefixes);
-  std::swap(bucketTries, coarseTries);
+  bucketPrefixes = std::move(coarseBucketPrefixes);
+  bucketTries = std::move(coarseTries);
 }
 
 }  // namespace trie
