@@ -59,12 +59,13 @@ void testSearchPrefix(
     std::cout << "." << std::endl;
   }
 
-  for (const size_t stringIndex : stringIndices) {
-    if (printMatches) {
+  if (printMatches) {
+    for (const size_t stringIndex : stringIndices) {
       std::cout << strings[stringIndex] << std::endl;
     }
   }
 
+  std::cout << std::endl;
   std::vector<size_t> expectedStringIndices;
   timer.start("Searching prefix \"" + prefix + "\" via naive loop...");
 
@@ -88,6 +89,14 @@ void testWithSimpleExample() {
   std::cout << std::endl;
 
   const std::vector<std::string> strings{"wetter", "hallo", "hello", "welt", "world", "haus"};
+
+  std::cout << "Input strings:" << std::endl;
+
+  for (const std::string& string : strings) {
+    std::cout << string << std::endl;
+  }
+
+  std::cout << std::endl;
   trie::Trie trie{strings};
   testSearchPrefix(strings, trie, "ha", true);
 }
